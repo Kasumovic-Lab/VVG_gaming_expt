@@ -1,4 +1,4 @@
-ANALYZING DOMINANCE PRACTICE HYPOTHESIS
+ANALYZING THE EFFECT OF VIOLENT VIDEO GAME PLAY ON MATE VALUE AND OTHER MATING RELATED VARIABLES
 ========================================================
 
 General housekeeping
@@ -60,7 +60,7 @@ my.summary <- function(x, na.rm=TRUE){
 }
 ```
 
-Load the data (DP_hypoth_data3.csv).
+Load the data (Complete_data_survey.csv).
 Note the as.is thing which leaves all the character vectors as strings and does not make them into factors.
 
 ```{r}
@@ -77,106 +77,70 @@ names(data)
 Recode gender into numerical values
 
 ```{r}
-data$Gender2 <- revalue(data$Gender, c("Male"="1", "Female"="2"))
+data$Gender2 <- revalue(data$sex_response, c("Male"="1", "Female"="2"))
 data$Gender2 <- as.numeric(as.character(data$Gender2))
 ```
 
 Ensuring that certain columns are treated as categorical
 
 ```{r}
-data$Sexuality <- factor(data$Sexuality)
-data$Education <- factor(data$Education)
-data$Occu <- factor(data$Occu)
-data$RelStat <- factor(data$RelStat)
-data$Reltime <- factor(data$Reltime)
-data$Relage <- factor(data$Relage)
+data$sexuality_response <- factor(data$sexuality_response)
+data$age_response <- factor(data$age_response)
+data$soirq1_response <- factor(data$soirq1_response)
+data$soirq2_response <- factor(data$soirq2_response)
+data$soirq3_response <- factor (data$soirq3_response)
 ```
 
-Then log transform CTS as it is right skewed, and create a new 'Income' variable
+
+Delete Rows where participants were unable to load or play game, or remember score
 
 ```{r}
-data$CTSlog <- log(data$CTS+1)
-data$Income <- (data$FutureIncome + data$CurrentIncome)/2
-```
-
-Delete Rows that are missing values in the ESRB Ratings, MateValue1, SOI & Leadership
-
-```{r}
-data<-data[-which(is.na(data$PlayXESRB_mean)),]
-data<-data[-which(is.na(data$MateValue1)),]
-data<-data[-which(is.na(data$SOI)),]
-data<-data[-which(is.na(data$Leadership)),]
+data<-data[-which(is.na(data$Removedata)),]
 ```
 
 Then subset data by Study
 
 ```{r}
-twit = subset(data, Study=="Twitter")
 mturk1 = subset(data, Study=="Mturk1")
-mturk2 = subset(data, Study=="MTurk2")
 ```
 
-Remove individuals that have a relationship status of 'other' (2 individuals in each replicate)
+Remove individuals that have a relationship status of 'other' (2 individuals)
 
 ```{r}
-mturk1 = subset(mturk1, RelStat %in% c("1", "2", "3", "4"))
-mturk2 = subset(mturk2, RelStat %in% c("1", "2", "3", "4"))
+mturk1 = subset(mturk1, relationshipstatus_response %in% c("Single", "In an open relationship/casually dating", "In a long-term monogamous relationship eg. married, partnered", "Recently single/divorced/separated"))
 ```
 
 Here's mean centring the data
 ```{r}
-mturk1$mc_MateValue1 <- scale(mturk1$MateValue1, center = TRUE, scale = TRUE)
-mturk1$mc_SOI <- scale(mturk1$SOI, center = TRUE, scale = TRUE)
-mturk1$mc_LeadershipDom <- scale(mturk1$LeadershipDom, center = TRUE, scale = TRUE)
-mturk1$mc_WordSum <- scale(mturk1$WordSum, center = TRUE, scale = TRUE)
-mturk1$mc_CTSlog <- scale(mturk1$CTSlog, center = TRUE, scale = TRUE)
+mturk1$mc_mvscaletotal <- scale(mturk1$mvscaletotal, center = TRUE, scale = TRUE)
+mturk1$mc_SOIRTOTAL <- scale(mturk1$SOIRTOTAL, center = TRUE, scale = TRUE)
+mturk1$mc_MvAverage <- scale(mturk1$MvAverage, center = TRUE, scale = TRUE)
+mturk1$mc_SGAAverage <- scale(mturk1$SGAAverage, center = TRUE, scale = TRUE)
+mturk1$mc_HostilityTotal <- scale(mturk1$HostilityTotal, center = TRUE, scale = TRUE)
+mturk1$mc_MATINGMOTIVATION_total <- scale(mturk1$MATINGMOTIVATION_total, center = TRUE, scale = TRUE)
 ```
 
-
-Explore 'MTurk1'
 ---------------
 
 What is the mean, SD and range of the age of respondents in the first sample?
 ```{r}
-mean(mturk1$Age)
-sd(mturk1$Age)
-range(mturk1$Age)
+mean(mturk1$age_response)
+sd(mturk1$age_response)
+range(mturk1$age_response)
 ```
-
-Get the correlation between current and expected future earnings
-```{r}
-r_mturk1_earnings <- lm(CurrentIncome ~ FutureIncome, data=mturk1)
-summary(r_mturk1_earnings)
-```
-
-What is the mean, SD of the age of respondents in the first sample?
-```{r}
-mean(mturk1$Height)
-sd(mturk1$Height)
-
-mean(mturk1$Weight)
-sd(mturk1$Weight)
-
-mean(mturk1$Strength, na.rm=TRUE)
-sd(mturk1$Strength, na.rm=TRUE)
-
-mean(mturk1$BodyShape, na.rm=TRUE)
-sd(mturk1$BodyShape, na.rm=TRUE)
-```
-
 
 
 Do men and women differ in the amount of violent video games they play (self-rated)
 
 ```{r}
-VVGsexM1 <- lm(PlayXViolence_mean ~ Gender + Age + Gender*Age, data = mturk1)
+VVGsexM1 <- lm(AverageFrequencyviolence_mean ~ sex_response + age_response + sex_response*age_response, data = mturk1)
 anova(VVGsexM1, test="Chisq")
 ```
 
 Plot to see it. Boxplot of VVGplay between gender (Self-reported)
 
 ```{r}
-ggplot(mturk1, aes(x=Gender, y=PlayXViolence_mean)) + geom_boxplot() + guides(fill=FALSE) + 
+ggplot(mturk1, aes(x=sex_response, y=AverageFrequencyviolence_mean)) + geom_boxplot() + guides(fill=FALSE) + 
   xlab("Gender") +
   ylab("Self-Rated Violence Exposure") +
   theme(axis.line = element_line(colour = "black"),
@@ -194,7 +158,7 @@ Here is the correlation between self- and objective-rated violence in video game
 
 Now make a histogram of the overlap in violent video game play between the sexes
 ```{r}
-hist1 <- ggplot(mturk1, aes(x=PlayXViolence_mean, fill=Gender)) + 
+hist1 <- ggplot(mturk1, aes(x=AverageFrequencyviolence_mean, fill=Gender)) + 
   geom_histogram(binwidth=2, position="dodge") +
   xlab("Self-rated Violence Exposure") +
   ylab("Count") +
@@ -214,7 +178,7 @@ hist1
 
 
 ```{r}
-cor(mturk1$PlayXViolence_mean,mturk1$PlayXESRB_mean)
+cor(mturk1$Averagefrequencyviolence_mean,mturk1$PlayXESRB_mean)
 ```
 
 get the columns that you want from the dataset
