@@ -101,7 +101,7 @@ data<-data[-which(is.na(data$Removedata)),]
 Then subset data by Study
 
 ```{r}
-mturk1 = subset(data, Study=="Mturk1")
+mturk1 = subset(data, study=="mturk1")
 ```
 
 Remove individuals that have a relationship status of 'other' (2 individuals)
@@ -158,7 +158,7 @@ Here is the correlation between self- and objective-rated violence in video game
 
 Now make a histogram of the overlap in violent video game play between the sexes
 ```{r}
-hist1 <- ggplot(mturk1, aes(x=AverageFrequencyviolence_mean, fill=Gender)) + 
+hist1 <- ggplot(mturk1, aes(x=AverageFrequencyviolence_mean, fill=sex_response)) + 
   geom_histogram(binwidth=2, position="dodge") +
   xlab("Self-rated Violence Exposure") +
   ylab("Count") +
@@ -186,6 +186,8 @@ then create a correlation matrix
 then get the p-values using the above function
 "flatten"" theat table using the above function
 
+?? 
+
 ```{r}
 corrmturk1 <- mturk1[, c(13,39,12,8,10,38,5,7,9,13)]
 cor(corrmturk1)
@@ -199,7 +201,7 @@ options(warn=-1)
 chart.Correlation(corrmturk1)
 ```
 
-Now to get the meands and SDs for the above selected columns using my.summary function
+Now to get the means and SDs for the above selected columns using my.summary function
 
 ```{r}
 sapply(corrmturk1, my.summary)  
@@ -208,16 +210,15 @@ sapply(corrmturk1, my.summary)
 and then the numbers in each of the categorical groups
 
 ```{r}
-table(mturk1$Education)
-table(mturk1$Sexuality)
-table(mturk1$RelStat)
+table(mturk1$sexuality_response)
+table(mturk1$relationshipstatus_response)
 ```
 
 relevel the coefficients
 ```{r}
-mturk1$RelStat <-relevel(mturk1$RelStat, "2")
+mturk1$RelStat <-relevel(mturk1$relationshipstatus_response, "2")
 mturk1$Sexuality <-relevel(mturk1$Sexuality, ref = "3")
-mturk1$Education <-relevel(mturk1$Education, ref = "1")
+
 ```
 
 Here is the full model
