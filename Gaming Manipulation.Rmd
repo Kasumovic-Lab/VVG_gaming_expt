@@ -47,7 +47,7 @@ flattenSquareMatrix <- function(m) {
 }
 ```
 
-Use this one for summary statistics
+Use this function for summary statistics
 
 ```{r}
 my.summary <- function(x, na.rm=TRUE){
@@ -92,7 +92,7 @@ data$soirq3_response <- factor (data$soirq3_response)
 ```
 
 
-Delete Rows where participants were unable to load or play game, or remember score
+Delete Rows where participants were unable to load or play game, or remember score, or have recorded gender as "Other".
 
 ```{r}
 data<-data[-which(is.na(data$Removedata)),]
@@ -101,46 +101,46 @@ data<-data[-which(is.na(data$Removedata)),]
 Then subset data by Study
 
 ```{r}
-mturk1 = subset(data, study=="mturk1")
+mturk = subset(data, study=="mturk")
 ```
 
 Remove individuals that have a relationship status of 'other' (2 individuals)
 
 ```{r}
-mturk1 = subset(mturk1, relationshipstatus_response %in% c("Single", "In an open relationship/casually dating", "In a long-term monogamous relationship eg. married, partnered", "Recently single/divorced/separated"))
+mturk = subset(mturk, relationshipstatus_response %in% c("Single", "In an open relationship/casually dating", "In a long-term monogamous relationship eg. married, partnered", "Recently single/divorced/separated"))
 ```
 
 Here's mean centring the data
 ```{r}
-mturk1$mc_mvscaletotal <- scale(mturk1$mvscaletotal, center = TRUE, scale = TRUE)
-mturk1$mc_SOIRTOTAL <- scale(mturk1$SOIRTOTAL, center = TRUE, scale = TRUE)
-mturk1$mc_MvAverage <- scale(mturk1$MvAverage, center = TRUE, scale = TRUE)
-mturk1$mc_SGAAverage <- scale(mturk1$SGAAverage, center = TRUE, scale = TRUE)
-mturk1$mc_HostilityTotal <- scale(mturk1$HostilityTotal, center = TRUE, scale = TRUE)
-mturk1$mc_MATINGMOTIVATION_total <- scale(mturk1$MATINGMOTIVATION_total, center = TRUE, scale = TRUE)
+mturk$mc_mvscaletotal <- scale(mturk$mvscaletotal, center = TRUE, scale = TRUE)
+mturk$mc_SOIRTOTAL <- scale(mturk$SOIRTOTAL, center = TRUE, scale = TRUE)
+mturk$mc_MvAverage <- scale(mturk$MvAverage, center = TRUE, scale = TRUE)
+mturk$mc_SGAAverage <- scale(mturk$SGAAverage, center = TRUE, scale = TRUE)
+mturk$mc_HostilityTotal <- scale(mturk$HostilityTotal, center = TRUE, scale = TRUE)
+mturk$mc_MATINGMOTIVATION_total <- scale(mturk$MATINGMOTIVATION_total, center = TRUE, scale = TRUE)
 ```
 
 ---------------
 
 What is the mean, SD and range of the age of respondents in the first sample?
 ```{r}
-mean(mturk1$age_response)
-sd(mturk1$age_response)
-range(mturk1$age_response)
+mean(mturk$age_response)
+sd(mturk$age_response)
+range(mturk$age_response)
 ```
 
 
 Do men and women differ in the amount of violent video games they play (self-rated)
 
 ```{r}
-VVGsexM1 <- lm(AverageFrequencyviolence_mean ~ sex_response + age_response + sex_response*age_response, data = mturk1)
+VVGsexM1 <- lm(AverageFrequencyviolence_mean ~ sex_response + age_response + sex_response*age_response, data = mturk)
 anova(VVGsexM1, test="Chisq")
 ```
 
 Plot to see it. Boxplot of VVGplay between gender (Self-reported)
 
 ```{r}
-ggplot(mturk1, aes(x=sex_response, y=AverageFrequencyviolence_mean)) + geom_boxplot() + guides(fill=FALSE) + 
+ggplot(mturk, aes(x=sex_response, y=AverageFrequencyviolence_mean)) + geom_boxplot() + guides(fill=FALSE) + 
   xlab("Gender") +
   ylab("Self-Rated Violence Exposure") +
   theme(axis.line = element_line(colour = "black"),
@@ -153,12 +153,10 @@ ggplot(mturk1, aes(x=sex_response, y=AverageFrequencyviolence_mean)) + geom_boxp
 ```
 
 Yes they do; women play less violent games. 
-Here is the correlation between self- and objective-rated violence in video games
-
 
 Now make a histogram of the overlap in violent video game play between the sexes
 ```{r}
-hist1 <- ggplot(mturk1, aes(x=AverageFrequencyviolence_mean, fill=sex_response)) + 
+hist1 <- ggplot(mturk, aes(x=AverageFrequencyviolence_mean, fill=sex_response)) + 
   geom_histogram(binwidth=2, position="dodge") +
   xlab("Self-rated Violence Exposure") +
   ylab("Count") +
@@ -176,23 +174,17 @@ hist1 <- ggplot(mturk1, aes(x=AverageFrequencyviolence_mean, fill=sex_response))
 hist1
 ```
 
-
-```{r}
-cor(mturk1$Averagefrequencyviolence_mean,mturk1$PlayXESRB_mean)
-```
-
 get the columns that you want from the dataset
 then create a correlation matrix
-then get the p-values using the above function
-"flatten"" theat table using the above function
-
-?? 
-
+then get the p-values using function described above
+"flatten"" that table using function described above  
+?? which columns??
+Factors: Gender, VVG exposure, MV1, MV2, SGA, Hostility, Mating motivation, SOIR, Game played, Sexuality, Age, Relationship status
 ```{r}
-corrmturk1 <- mturk1[, c(13,39,12,8,10,38,5,7,9,13)]
-cor(corrmturk1)
-cor.prob(corrmturk1)
-flattenSquareMatrix(cor.prob(corrmturk1))
+corrmturk <- mturk[, c(29,27,43,76,85,92,97,114,34,35,28,36)]
+cor(corrmturk)
+cor.prob(corrmturk)
+flattenSquareMatrix(cor.prob(corrmturk))
 ```
 
 Finally, plot the data using, but turn off warnings first
@@ -204,63 +196,65 @@ chart.Correlation(corrmturk1)
 Now to get the means and SDs for the above selected columns using my.summary function
 
 ```{r}
-sapply(corrmturk1, my.summary)  
+sapply(corrmturk, my.summary)  
 ```
 
 and then the numbers in each of the categorical groups
 
 ```{r}
-table(mturk1$sexuality_response)
-table(mturk1$relationshipstatus_response)
+table(mturk$sexuality_response)
+table(mturk$relationshipstatus_response)
 ```
 
 relevel the coefficients
 ```{r}
-mturk1$RelStat <-relevel(mturk1$relationshipstatus_response, "2")
-mturk1$Sexuality <-relevel(mturk1$Sexuality, ref = "3")
+mturk$relationshipstatus_response <-relevel(mturk$relationshipstatus_response, "2")
+mturk$sexuality_response <-relevel(mturk$sexuality_response, ref = "3")
 
 ```
 
 Here is the full model
 
 ```{r}
-VGplayself.all.mturk1<-lm(PlayXViolence_mean ~ MV1.new + SOI + LeadershipDom + WordSum + CTSlog + Sexuality + RelStat + Income + Education + Gender + Age + Gender*MV1.new + Gender*SOI + Gender*LeadershipDom + Gender*WordSum + Gender*CTSlog + Gender*Sexuality + Gender*RelStat + Gender*Income + Gender*Education, data=mturk1)
+VGplayself.all.mturk<-lm(Averagefrequencyviolence~ Mvscaletotal + MvAgerage + SOIRtotal + SGAAverage + HostilityTotal + MATINGMOTIVATION_total + sex_response + sexuality_response + age_response + relationshipstatus_response + VorNV +` sex_response*mvscaletotal + sex_response*SOIRtotal+ sex_response*MvAverage +sex_response*SGAAverage + sex_response*HostilityTotal + sex_response*MATINGMOTIVATION_total + sex_response*sexuality_response + sex_response*relationshipstatus_response, data=mturk)
 
-anova(VGplayself.all.mturk1, test="typeIII")
-summary(VGplayself.all.mturk1)
+anova(VGplayself.all.mturk, test="typeIII")
+summary(VGplayself.all.mturk)
 
-etasq(VGplayself.all.mturk1)
+etasq(VGplayself.all.mtur)
 ```
 
-calculate r-squared for relationship between SOI, Education & MV with VVGExposure
+calculate r-squared for relationship between SOI & MV with VVGExposure
 
 ```{r}
-r_mturk1_SOI <- lm(PlayXViolence_mean ~ SOI, data=mturk1)
-summary(r_mturk1_SOI)
+r_mturk_SOIR <- lm(Averageviolencefrequency ~ SOIRTOTAL, data=mturk)
+summary(r_mturk1_SOIR)
 
-r_mturk1_EDU <- lm(PlayXViolence_mean ~ Education, data=mturk1)
-summary(r_mturk1_EDU)
+r_mturk_MV.m <- lm(Averageviolencefrequency ~ Mvscaletotal, data=subset(mturk, sex_response="Male"))
+summary(r_mturk_MV.m)
 
-r_mturk1_MV.m <- lm(PlayXViolence_mean ~ MV1.new, data=subset(mturk1, Gender=="Male"))
-summary(r_mturk1_MV.m)
+r_mturk_MV.f <- lm(Averageviolencefrequency ~ Mvscaletotal, data=subset(mturk, sex_response=="Female"))
+summary(r_mturk_MV.f)
 
-r_mturk1_MV.f <- lm(PlayXViolence_mean ~ MV1.new, data=subset(mturk1, Gender=="Female"))
-summary(r_mturk1_MV.f)
+r_mturk_MV2.m <- lm(Averageviolencefrequency ~ MvAverage, data=subset(mturk, sex_response="Male"))
+summary(r_mturk_MV2.m)
 
+r_mturk_MV2.f <- lm(Averageviolencefrequency ~ MvAverage, data=subset(mturk, sex_response=="Female"))
+summary(r_mturk_MV2.f)
 ```
 
 these are standardized coefficients...apparantly
 
 ```{r}
-lm.beta(VGplayself.all.mturk1)
+lm.beta(VGplayself.all.mturk)
 ```
 
 It seems SOI has an overall effect and there is an interaction between Mate Value and Gender
 
-Plot Mate Value and VVGplay for each gender
+Plot Mate Value and VVGplay for each gender - 22 question mv scale
 
 ```{r}
-plotMV1 <- ggplot(mturk1, aes(x = MV1.new, y = PlayXViolence_mean, color = Gender, shape = Gender, linetype = Gender)) + 
+plotMvAverage <- ggplot(mturk, aes(x = MvAverage, y = Averagefrequencyviolence, color = sex_response, shape = sex_response, linetype = sex_response)) + 
   geom_point(size = 4) + 
   ylim(0,50) +
   scale_colour_hue(l=50, guide = FALSE) +
@@ -281,9 +275,39 @@ plotMV1 <- ggplot(mturk1, aes(x = MV1.new, y = PlayXViolence_mean, color = Gende
 plotMV1
 ```
 
+Plot with MVscaletotal - 4 general MV questions 
+```{r}
+plotMvscaletotal <- ggplot(mturk, aes(x = Mvscaletotal, y = Averagefrequencyviolence, color = sex_response, shape = sex_response, linetype = sex_response)) + 
+  geom_point(size = 4) + 
+  ylim(0,50) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Mate Value") +
+  ylab("Violent Video Game Exposure") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotMV1
+```
+
+Now, plot both MV figures together
+```{r}
+grid.arrange(plotMV1, plotMV2, ncol=2)
+g <- arrangeGrob(plotMV1, plotMV2, ncol=2)
+ggsave(file="MateValue.tiff",g)
+```
+
 Now plot SOI
 ```{r}
-plotSOI1 <- ggplot(mturk1, aes(x = SOI, y = PlayXViolence_mean, color = Gender, shape = Gender, linetype = Gender)) + 
+plotSOI1 <- ggplot(mturk, aes(x = SOIRTOTAL, y = Averagefrequencyviolence, color = sex_response, shape = sex_response, linetype = sex_response)) + 
   geom_point(size=4) +
   ylim(0,50) +
   scale_colour_hue(l=50, guide = FALSE) +
@@ -304,263 +328,10 @@ plotSOI1 <- ggplot(mturk1, aes(x = SOI, y = PlayXViolence_mean, color = Gender, 
 plotSOI1
 ```
 
-Boxplot of VVGplay with education  (Self-reported)
 
+Now plot mating motivation
 ```{r}
-BoxEDU1 <- ggplot(mturk1, aes(x=Education, y=PlayXViolence_mean)) + geom_boxplot() + 
-  guides(fill=FALSE) + 
-  xlab("Level of Education") +
-  ylab("Self-Rated Violence Exposure") +
-  scale_x_discrete(labels=c("Primary", "High School", "Vocational", "University", "Post-Graduate"))+
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        axis.text.x = element_text(angle = 90, hjust = 1),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
-
-BoxEDU1
-```
-
-Explore 'MTurk2'
-----------------
-
-Do men and women differ in the amount of violent video games they play (self-rated)
-
-```{r}
-VVGsexM2 <- lm(PlayXViolence_mean ~ Gender + Age + Gender*Age, data = mturk2)
-anova(VVGsexM2, test="Chisq")
-```
-
-Plot to see it. Boxplot of VVGplay between gender (Self-reported)
-
-```{r}
-ggplot(mturk2, aes(x=Gender, y=PlayXViolence_mean)) + geom_boxplot() + guides(fill=FALSE) + 
-  xlab("Gender") +
-  ylab("Self-Rated Violence Exposure") +
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
-```
-
-Yes they do; women play less violent games. 
-
-Now make a histogram of the overlap in violent video game play between the sexes
-```{r}
-hist2 <- ggplot(mturk2, aes(x=PlayXViolence_mean, fill=Gender)) + 
-  geom_histogram(binwidth=2, position="dodge") +
-  xlab("Self-rated Violence Exposure") +
-  ylab("Count") +
-  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-  theme(axis.line = element_line(colour = "black"),
-        plot.title = element_text(size=30, face="bold"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        legend.position=c(1,1),legend.justification=c(1,1)) 
-
-hist2
-```
-
-
-Again, here is the coorrelation between self- and objective-ratings of violence
-
-```{r}
-cor(mturk2$PlayXViolence_mean,mturk2$PlayXESRB_mean)
-```
-
-Again, use the same function as above to get a table and figure of correlation values
-
-```{r}
-corrmturk2 <- mturk2[, c(13,6,7,8,10,39,12,17)]
-cor(corrmturk2)
-cor.prob(corrmturk2)
-flattenSquareMatrix(cor.prob(corrmturk2))
-```
-
-Finally, plot the data
-```{r}
-chart.Correlation(corrmturk2)
-```
-
-Now to get the means and SDs for the above selected columns using my.summary function
-
-```{r}
-sapply(corrmturk2, my.summary)  
-```
-
-and then the numbers in each of the categorical groups
-
-```{r}
-table(mturk2$Education)
-table(mturk2$Sexuality)
-table(mturk2$RelStat)
-```
-
-relevel the coefficients
-```{r}
-mturk2$RelStat <-relevel(mturk2$RelStat, "2")
-mturk2$Sexuality <-relevel(mturk2$Sexuality, ref = "3")
-mturk2$Education <-relevel(mturk2$Education, ref = "1")
-```
-
-Here is the full model WITHOUT game motivation
-
-```{r}
-VGplayself.all1.mturk2<-lm(PlayXViolence_mean ~ Mvall + SOI + LeadershipDom + WordSum + Sexuality + RelStat + Income + Education + Gender + Age + Gender*Mvall + Gender*SOI + Gender*LeadershipDom + Gender*WordSum + Gender*Sexuality + Gender*RelStat + Gender*Income + Gender*Education, data=mturk2)
-
-anova(VGplayself.all1.mturk2, test="Chisq")
-summary(VGplayself.all1.mturk2)
-
-etasq(VGplayself.all1.mturk2)
-```
-
-calculate r-squared for relationship between SOI, Education & MV with VVGExposure
-
-```{r}
-r_mturk2_SOI <- lm(PlayXViolence_mean ~ SOI, data=mturk2)
-summary(r_mturk2_SOI)
-
-r_mturk2_EDU <- lm(PlayXViolence_mean ~ Education, data=mturk2)
-summary(r_mturk2_EDU)
-
-r_mturk2_MV.m <- lm(PlayXViolence_mean ~ MV1.new, data=subset(mturk2, Gender=="Male"))
-summary(r_mturk2_MV.m)
-
-r_mturk2_MV.f <- lm(PlayXViolence_mean ~ MV1.new, data=subset(mturk2, Gender=="Female"))
-summary(r_mturk2_MV.f)
-
-r_mturk2_age <- lm(PlayXViolence_mean ~ Age, data=mturk2)
-summary(r_mturk2_age)
-```
-
-Here is the full model WITH game motivation
-
-```{r}
-VGplayself.all2.mturk2<-lm(PlayXViolence_mean ~ Mvall + SOI + LeadershipDom + WordSum + Sexuality + RelStat + Income + Education + log(GameMotivation_mean_new) + Gender + Age + Gender*Mvall + Gender*SOI + Gender*LeadershipDom + Gender*WordSum + Gender*Sexuality + Gender*RelStat + Gender*Income + Gender*Education + Gender*log(GameMotivation_mean_new), data=mturk2)
-
-anova(VGplayself.all2.mturk2, test="Chisq")
-summary(VGplayself.all2.mturk2)
-
-etasq(VGplayself.all2.mturk2)
-```
-
-
-
-these are standardized coefficients...apparantly
-
-```{r}
-lm.beta(VGplayself.all.mturk2)
-```
-
-Plot Mate Value and VVGplay for each gender
-
-```{r}
-plotMV2 <- ggplot(mturk2, aes(x = Mvall, y = PlayXViolence_mean, color = Gender, shape = Gender, linetype = Gender)) + 
-  geom_point(size=4) +
-  ylim(0,50) +
-  scale_colour_hue(l=50, guide = FALSE) +
-  scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
-  theme_bw() + geom_smooth(method=lm, fullrange=T) + 
-  xlab("Mate Value") +
-  ylab(NULL) +
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        axis.title.y=element_text(vjust=0.25),
-        axis.title.x=element_text(vjust=0.25),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        legend.position=c(.90,.10)) 
-
-plotMV2
-```
-
-Now, plot both MV figures together
-```{r}
-grid.arrange(plotMV1, plotMV2, ncol=2)
-g <- arrangeGrob(plotMV1, plotMV2, ncol=2)
-ggsave(file="MateValue.tiff",g)
-```
-
-Now plot SOI
-```{r}
-plotSOI2 <- ggplot(mturk2, aes(x = SOI, y = PlayXViolence_mean, color = Gender, shape = Gender, linetype = Gender)) + 
-  geom_point(size=4) +
-  ylim(0,50) +
-  scale_colour_hue(l=50, guide = FALSE) +
-  scale_x_continuous(limits=c(0,80)) +
-  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
-  xlab("Sexual Interest") +
-  ylab(NULL) +
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        axis.title.y=element_text(vjust=0.25),
-        axis.title.x=element_text(vjust=0.25),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        legend.position=c(.90,.10)) 
-plotSOI2
-```
-
-Boxplot of VVGplay with education  (Self-reported)
-
-```{r}
-BoxEDU2 <- ggplot(mturk2, aes(x=Education, y=PlayXViolence_mean)) + geom_boxplot() + 
-  guides(fill=FALSE) + 
-  xlab("Level of Education") +
-  ylab(NULL) +
-  scale_x_discrete(labels=c("Primary", "High School", "Vocational", "University", "Post-Graduate"))+
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        axis.text.x = element_text(angle = 90, hjust = 1),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
-
-BoxEDU2
-```
-
-Now, plot both figures together
-```{r}
-grid.arrange(plotSOI1, plotSOI2, ncol=2)
-g <- arrangeGrob(plotSOI1, plotSOI2, ncol=2)
-ggsave(file="SOI.eps",g)
-```
-
-Now, plot both histograms of violent videogame play together
-```{r}
-grid.arrange(hist1, hist2, ncol=2)
-g <- arrangeGrob(hist1, hist2, ncol=2)
-ggsave(file="histogram.jpg",g)
-```
-
-And now both boxplots of education together
-```{r}
-grid.arrange(BoxEDU1, BoxEDU2, ncol=2)
-g <- arrangeGrob(BoxEDU1, BoxEDU2, ncol=2)
-ggsave(file="Education.tiff",g)
-```
-
-Now plot game_motivation
-```{r}
-ggplot(mturk2, aes(x = GameMotivation_mean_new, y = PlayXViolence_mean, color = Gender, shape = Gender, linetype = Gender)) + 
+ggplot(mturk, aes(x = MATINGMOTIVATION_total, y = Averagefrequencyviolence, color = sex_response, shape = sex_response, linetype = sex_response)) + 
   geom_point(size=4) +
   theme_bw() + geom_smooth(method=lm, fullrange=T) + 
   scale_colour_hue(l=50, guide = FALSE) +
@@ -582,35 +353,6 @@ ggplot(mturk2, aes(x = GameMotivation_mean_new, y = PlayXViolence_mean, color = 
 ```
 
 
-Next, I'm going to look at Kids, NumberGirls, NumberBoys, NumberTeenageBoys, KidsAge_mean, TeenageBoys_Binary.
-
-but first I'll cut out the individuals that were never married as those individuals skew things at zero.
-
-```{r}
-mturk1Kids = subset(mturk1, RelStat %in% c("1", "3"))
-
-VGplayself.family.mturk1<-lm(PlayXViolence_mean ~ NumberBoys + NumberGirls + Gender + Gender*NumberBoys + Gender*NumberGirls, data=mturk1Kids)
-anova(VGplayself.family.mturk1, test="Chisq")
-```
-
-Looks like the number of boys a woman and man have affects how much violent video game exposure they have.
-
-Let's plot that shit!!!
-
-```{r}
-ggplot(mturk1Kids, aes(x = NumberBoys, y = PlayXViolence_mean, color = Gender)) + geom_point(shape=1, size=4) +
-  theme_bw() + geom_smooth(method=lm, se=FALSE, fullrange=T) + 
-  xlab("The number of male offspring") +
-  ylab("Violent Video Game Exposure") +
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
-```
-
 
 Supplementary Materials
 -----------------------
@@ -618,22 +360,8 @@ Supplementary Materials
 Here is the full model with age and all the interactions for Mturk 1
 
 ```{r}
-VGplayself.all.mturk1<-lm(PlayXViolence_mean ~ MV1.new + SOI + LeadershipDom + WordSum + CTSlog + Sexuality + RelStat + Income + Education + Gender + Age + Gender*MV1.new + Gender*SOI + Gender*LeadershipDom + Gender*WordSum + Gender*CTSlog + Gender*Sexuality + Gender*RelStat + Gender*Income + Gender*Education + Age*MV1.new + Age*SOI + Age*LeadershipDom + Age*WordSum + Age*CTSlog + Age*Sexuality + Age*RelStat + Age*Income + Age*Education, data=mturk1)
+VGplayself.all.mturk<-lm(Averagefrequencyviolence ~ Mvscaletotal + MvAverage + SGAAverage+ HostilityTotal  + MATINGMOTIVATION_total + SOIRTOTAL + sexuality_response + sex_response + age_response + relationshipstatus_response +VorNV + sex_response*Mvscaletotal +sex_response**MvAverage +sex_response*sexuality_response +sex_response*relationshipstatus_response+ age_response*Mvscaletotal +age_response*MvAverage + age_response*SGAAverage + age_response*HostilityTotal + age_response*MATINGMOTIVATION_total +age_response*SOIRTOTAL + age_response*sexuality_response + age_response*relationshipstatus_response, data=mturk)
 
 anova(VGplayself.all.mturk1, test="Chisq")
 summary(VGplayself.all.mturk1)
 ```
-
-and now for Mturk 2
-
-```{r}
-VGplayself.all.mturk2<-lm(PlayXViolence_mean ~ Mvall + SOI + WordSum + Sexuality + RelStat + Income + Education + Gender + Age + Gender*Mvall + Gender*SOI + Gender*WordSum + Gender*Sexuality + Gender*RelStat + Gender*Income + Gender*Education + Age*Mvall + Age*SOI + Age*WordSum + Age*Sexuality + Age*RelStat + Age*Income + Age*Education, data=mturk2)
-
-anova(VGplayself.all.mturk2, test="Chisq")
-summary(VGplayself.all.mturk2)
-```
-
-
-ADD ESRB RATING ANALYSES HERE AS EXTRA ANALYSES
-
-
