@@ -15,62 +15,16 @@ library(plyr)
 require(gridExtra)
 ```
 
-Next load the functions that we'll use for summary data
-
-Using the script written here: http://www.r-bloggers.com/more-on-exploring-correlations-in-r/
-to create the correlation data for the table, but also to create a figure of correlation values
-
-See http://goo.gl/nahmV for documentation of this function
-```{r}
-cor.prob <- function (X, dfr = nrow(X) - 2) {
-  R <- cor(X, use="pairwise.complete.obs")
-  above <- row(R) < col(R)
-  r2 <- R[above]^2
-  Fstat <- r2 * dfr/(1 - r2)
-  R[above] <- 1 - pf(Fstat, 1, dfr)
-  R[row(R) == col(R)] <- NA
-  R
-}
-```
-
-Use this function to dump the cor.prob output to a 4 column matrix with row/column indices, correlation, and p-value. See StackOverflow question: http://goo.gl/fCUcQ
-
-```{r}
-flattenSquareMatrix <- function(m) {
-  if( (class(m) != "matrix") | (nrow(m) != ncol(m))) stop("Must be a square matrix.") 
-  if(!identical(rownames(m), colnames(m))) stop("Row and column names must be equal.")
-  ut <- upper.tri(m)
-  data.frame(i = rownames(m)[row(m)[ut]],
-             j = rownames(m)[col(m)[ut]],
-             cor=t(m)[ut],
-             p=m[ut])
-}
-```
-
-Use this function for summary statistics
-
-```{r}
-my.summary <- function(x, na.rm=TRUE){
-  result <- c(Mean=mean(x, na.rm=na.rm),
-              SD=sd(x, na.rm=na.rm),
-              Median=median(x, na.rm=na.rm),
-              Min=min(x, na.rm=na.rm),
-              Max=max(x, na.rm=na.rm), 
-              N=length(x))
-}
-```
-
 Load the data (Complete_data_survey.csv).
 Note the as.is thing which leaves all the character vectors as strings and does not make them into factors.
 
 ```{r}
-data = read.csv(file.choose(), na.strings =".", as.is = T, header=T, fill=T, quote="", sep=",")
+data = read.csv(file.choose(),  na.strings =".", header=T, sep=",")
 ```
 
 Attach and check the headers of each column
 
 ```{r}
-attach(data)
 names(data)
 ```
 
@@ -85,24 +39,19 @@ Ensuring that certain columns are treated as categorical
 
 ```{r}
 data$Sexuality <- factor(data$Sexuality)
-data$Age <- factor(data$Age)
-data$soirq1_response <- factor(data$soirq1_response)
-data$soirq2_response <- factor(data$soirq2_response)
-data$soirq3_response <- factor (data$soirq3_response)
+data$soirq1_response <- factor(data$soirq1)
+data$soirq2_response <- factor(data$soirq2)
+data$soirq3_response <- factor (data$soirq3)
 ```
 
 
 Delete Rows where participants were unable to load or play game, or remember score, or have recorded gender as "Other".
 
 ```{r}
-data<-data[-which(is.na(data$Removedata)),]
+data<-data[-which(data$Removedata == ""), ]
+data<-data[-which(data$Gender == "Other"), ]
 ```
 
-Then subset data by Study
-
-```{r}
-mturk = subset(data, study=="mturk")
-```
 
 Remove individuals that have a relationship status of 'other' (2 individuals)
 
@@ -124,39 +73,49 @@ mturk$mc_MMTotal <- scale(mturk$MMTotal, center = TRUE, scale = TRUE)
 
 What is the mean, SD and range of the age of respondents in the first sample?
 ```{r}
-mean(mturk$age)
-sd(mturk$age)
-range(mturk$age)
+mean(data$Age)
+sd(data$Age)
+range(data$Age)
 ```
 
 
 Do men and women differ in the amount of violent video games they play (self-rated)
 
 ```{r}
-VVGsexM1 <- lm(Averagefrequencyviolence_mean ~  + Age + Gender*Age, data = mturk)
-anova(VVGsexM1, test="Chisq")
+VVGSex <- lm(Averagefrequencyviolence ~ Age + Gender + Age*Gender)
+anova(VVGSex, test="Chisq")
+summary(VVGSex, test="Chisq")
+
 ```
 
 Plot to see it. Boxplot of VVGplay between gender (Self-reported)
 
 ```{r}
-ggplot(mturk, aes(x=Gender, y=Averagefrequencyviolence_mean)) + geom_boxplot() + guides(fill=FALSE) + 
-  xlab("Gender") +
-  ylab("Self-Rated Violence Exposure") +
+ggplot(data, aes(x = MV1Total, y = Selfscore, color = Gender)) + 
+  geom_point(size = 4) + 
+ # ylim(0,50) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Mate Value") +
+  ylab("Violent Video Game Exposure") +
+  theme(legend.position="none") +
   theme(axis.line = element_line(colour = "black"),
         axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
+
 ```
 
 Yes they do; women play less violent games. 
 
 Now make a histogram of the overlap in violent video game play between the sexes
 ```{r}
-hist1 <- ggplot(mturk, aes(x=Averagefrequencyviolence_mean, fill=Gender)) + 
+ggplot(data, aes(x=Averagefrequencyviolence, fill=Gender)) + 
   geom_histogram(binwidth=2, position="dodge") +
   xlab("Self-rated Violence Exposure") +
   ylab("Count") +
@@ -170,58 +129,16 @@ hist1 <- ggplot(mturk, aes(x=Averagefrequencyviolence_mean, fill=Gender)) +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
-
-hist1
 ```
 
-get the columns that you want from the dataset
-then create a correlation matrix
-then get the p-values using function described above
-"flatten"" that table using function described above  
-?? which columns??
-Factors: Gender, VVG exposure, MV1, MV2, SGA, Hostility, Mating motivation, SOIR, Game played, Sexuality, Age, Relationship status
-```{r}
-corrmturk <- mturk[, c(29,27,43,76,85,92,97,114,34,35,28,36)]
-cor(corrmturk)
-cor.prob(corrmturk)
-flattenSquareMatrix(cor.prob(corrmturk))
-```
-
-Finally, plot the data using, but turn off warnings first
-```{r}
-options(warn=-1)
-chart.Correlation(corrmturk1)
-```
-
-Now to get the means and SDs for the above selected columns using my.summary function
-
-```{r}
-sapply(corrmturk, my.summary)  
-```
-
-and then the numbers in each of the categorical groups
-
-```{r}
-table(mturk$Sexuality)
-table(mturk$Relationshipstatus)
-```
-
-relevel the coefficients
-```{r}
-mturk$Relationshipstatus <-relevel(mturk$Relationshipstatus, "2")
-mturk$Sexuality <-relevel(mturk$Sexuality, ref = "3")
-
-```
 
 Here is the full model
 
 ```{r}
-VGplayself.all.mturk<-lm(Averagefrequencyviolence~ MV1Total + MV2Average + SOIRTOTAL + SGAAverage + HostilityTotal + MMTotal + Gender + Sexuality + Age + Relationshipstatus + VorNV + Gender*MV1Total + Gender*SOIRtotal + Gender*MV2Average + Gender*HostilityTotal + Gender*MMTotal + Gender*Sexuality + Gender*Relationshipstatus, data=mturk)
+VGplayself.all<-lm(Averagefrequencyviolence~ MV1Total + MV2Average + SOIRTOTAL + SGAAverage + HostilityTotal + MMTotal + Gender + Sexuality + Age + Relationshipstatus + VorNV + Gender*MV1Total + Gender*SOIRtotal + Gender*MV2Average + Gender*HostilityTotal + Gender*MMTotal + Gender*Sexuality + Gender*Relationshipstatus, data=data)
 
-anova(VGplayself.all.mturk, test="typeIII")
-summary(VGplayself.all.mturk)
-
-etasq(VGplayself.all.mtur)
+anova(VGplayself.all, test="typeIII")
+summary(VGplayself.all)
 ```
 
 calculate r-squared for relationship between SOI & MV with VVGExposure
@@ -241,12 +158,6 @@ summary(r_mturk_MV2.m)
 
 r_mturk_MV2.f <- lm(Averageviolencefrequency ~ MV2Average, data=subset(mturk, Gender=="Female"))
 summary(r_mturk_MV2.f)
-```
-
-these are standardized coefficients...apparantly
-
-```{r}
-lm.beta(VGplayself.all.mturk)
 ```
 
 It seems SOI has an overall effect and there is an interaction between Mate Value and Gender
@@ -355,26 +266,26 @@ ggplot(mturk, aes(x = MMTotal, y = Averagefrequencyviolence, color = Gender, sha
 Gaming manipulation: 
 MV1 + VVG + gender ANOVA*
 ```{r}
-VorNVMV1 <- lm(MV1Total ~  + VorNV + VorNV*Gender, data = mturk)
+VorNVMV1 <- lm(MV1Total ~  VorNV + Age + Gender + Averagefrequencyviolence + Selfscore, data = data)
 anova(VorNVMV1, test="Chisq")
 ```
 
 
 MV2 + VVG + Gender ANOVA
 ```{r}
-VorNVMV2 <- lm(MV2Average ~  + VorNV + VorNV*Gender, data = mturk)
+VorNVMV2 <- lm(MV2Average ~  VorNV + Gender + VorNV*Gender + VorNV*Age + Averagefrequencyviolence, data = data)
 anova(VorNVMV2, test="Chisq")
 ```
 
 SGA + VVG + gender ANOVA
 ```{r}
-SGAVVG <- lm(SGAAverage ~  + VorNV + VorNV*Gender, data = mturk)
+SGAVVG <- lm(SGAAverage ~  VorNV + Gender + VorNV*Gender + VorNV*Age + Averagefrequencyviolence, data = data)
 anova(SGAVVG, test="Chisq")
 ```
 
 Hostility + VVG + gender ANOVA
 ```{r}
-HostVVG <- lm(HostilityTotal ~  + VorNV + VorNV*Gender, data = mturk)
+HostVVG <- lm(HostilityTotal ~  VorNV + Gender + VorNV*Gender + VorNV*Age + Averagefrequencyviolence, data = data)
 anova(HostVVG, test="Chisq")
 ```
 
