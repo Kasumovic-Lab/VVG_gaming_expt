@@ -62,12 +62,12 @@ data = subset(data, Relationshipstatus %in% c("Single", "In an open relationship
 
 Here's mean centring the data
 ```{r}
-data$mc_MV1Total <- scale(data$MV1Total, center = TRUE, scale = TRUE)
-data$mc_SOIRTOTAL <- scale(data$SOIRTOTAL, center = TRUE, scale = TRUE)
-data$mc_MV2Average <- scale(data$MV2Average, center = TRUE, scale = TRUE)
-data$mc_SGAAverage <- scale(data$SGAAverage, center = TRUE, scale = TRUE)
-data$mc_HostilityTotal <- scale(data$HostilityTotal, center = TRUE, scale = TRUE)
-data$mc_MMTotal <- scale(data$MMTotal, center = TRUE, scale = TRUE)
+#data$mc_MV1Total <- scale(data$MV1Total, center = TRUE, scale = TRUE)
+#data$mc_SOIRTOTAL <- scale(data$SOIRTOTAL, center = TRUE, scale = TRUE)
+#data$mc_MV2Average <- scale(data$MV2Average, center = TRUE, scale = TRUE)
+#data$mc_SGAAverage <- scale(data$SGAAverage, center = TRUE, scale = TRUE)
+#data$mc_HostilityTotal <- scale(data$HostilityTotal, center = TRUE, scale = TRUE)
+#data$mc_MMTotal <- scale(data$MMTotal, center = TRUE, scale = TRUE)
 ```
 
 ---------------
@@ -130,7 +130,7 @@ BoxVVGgender
 Here is the full model
 
 ```{r}
-VGplayselfall<-lm(Averagefrequencyviolence~ MV1Total + MV2Average + SOIRTOTAL + SGAAverage + HostilityTotal + MATINGMOTIVATIONTotal + Gender + Sexuality + Age + Relationshipstatus + VorNV + Gender*MV1Total + Gender*SOIRtotal + Gender*MV2Average + Gender*HostilityTotal + Gender*MATINGMOTIVATIONTotal + Gender*Sexuality + Gender*Relationshipstatus, data=data)
+VGplayselfall<-lm(Averagefrequencyviolence~ MV1Total + MV2Average + SOIRTOTAL + SGAAverage + HostilityTotal + MATINGMOTIVATIONtotal + Gender + Sexuality + Age + Relationshipstatus + VorNV + Gender*MV1Total + Gender*SOIRTOTAL + Gender*MV2Average + Gender*HostilityTotal + Gender*MATINGMOTIVATIONtotal + Gender*Sexuality + Gender*Relationshipstatus, data=data)
 
 anova(VGplayselfall, test="typeIII")
 summary(VGplayselfall)
@@ -141,11 +141,11 @@ calculate r-squared for relationship between SOI & MV with VVGExposure
 ```{r}
 cor.test(data$Averagefrequencyviolence,data$SOIRTOTAL)
 
-data.fem = subset(data, Gender=="Female")
-cor.test(data.fem$Averagefrequencyviolence,data.fem$MV1)
+#data.fem = subset(data, Gender=="Female")
+#cor.test(data.fem$Averagefrequencyviolence,data.fem$MV1)
 
-data.mal = subset(data, Gender=="Male")
-cor.test(data.mal$Averagefrequencyviolence,data.mal$MV1)
+#data.mal = subset(data, Gender=="Male")
+#cor.test(data.mal$Averagefrequencyviolence,data.mal$MV1)
 
 ```
 22 Item MV scale and VVG for each gender regression
@@ -205,9 +205,9 @@ ggplot(data, aes(x = MV1Total, y = Selfscore, color = Gender)) +
 
 Now, plot both MV figures together
 ```{r}
-grid.arrange(plotMV1, plotMV2, ncol=2)
-g <- arrangeGrob(plotMV1, plotMV2, ncol=2)
-ggsave(file="MateValue.tiff",g)
+#grid.arrange(plotMV1, plotMV2, ncol=2)
+#g <- arrangeGrob(plotMV1, plotMV2, ncol=2)
+#ggsave(file="MateValue.tiff",g)
 ```
 
 SOI + Averagefrequencyviolence+Gender Regression
@@ -310,68 +310,68 @@ anova(MMANOVAVVG, test="Chisq")
 MV Scale and Violent or NV game histogram: 
 
 ```{r}
-histogram(~MV1Total|VorNV*Gender, data=data,
-       type="MV",
-       xlab="Gender",
-       main="")
+#hist(~MV1Total|VorNV*Gender, data=data,
+#       type="MV",
+#       xlab="Gender",
+#       main="")
 ```
 
 MV2 x V or Non V histogram
 ```{r}
-ggplot(data, aes(x=VorNV, y=MV2Average, fill=Gender)) + 
-  geom_histogram(binwidth=2, position="dodge") +
-  xlab("Violent or Non-violent game played") +
-  ylab("Mate Value Total") +
-  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-  theme(axis.line = element_line(colour = "black"),
-        plot.title = element_text(size=30, face="bold"),
-        legend.position = "none",
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
+#ggplot(data, aes(x=VorNV, y=MV2Average, fill=Gender)) + 
+#  geom_histogram(binwidth=2, position="dodge") +
+#  xlab("Violent or Non-violent game played") +
+#  ylab("Mate Value Total") +
+#  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
+#  theme(axis.line = element_line(colour = "black"),
+#        plot.title = element_text(size=30, face="bold"),
+#        legend.position = "none",
+#        axis.text=element_text(size=18),
+#        axis.title=element_text(size=20,face="bold"),
+#        panel.grid.major = element_blank(),
+#        panel.grid.minor = element_blank(),
+#        panel.border = element_blank(),
+#        panel.background = element_blank()) 
 
 ```
 
 Historgram for SGA and VorNV
 ```{r}
-histvornvmv1 <- ggplot(data, aes(x=VorNV, y=SGAAverage, fill=Gender)) + 
-  geom_histogram(binwidth=2, position="dodge") +
-  xlab("Violent or Non-violent game played") +
-  ylab("Sex Goal Activation") +
-  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-  theme(axis.line = element_line(colour = "black"),
-        plot.title = element_text(size=30, face="bold"),
-        legend.position = "none",
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
+#histvornvmv1 <- ggplot(data, aes(x=SGAAverage, y=VorNV, fill=Gender)) + 
+#  geom_histogram(binwidth=2, position="dodge") +
+#  xlab("Violent or Non-violent game played") +
+#  ylab("Sex Goal Activation") +
+#  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
+#  theme(axis.line = element_line(colour = "black"),
+#        plot.title = element_text(size=30, face="bold"),
+#        legend.position = "none",
+#        axis.text=element_text(size=18),
+#        axis.title=element_text(size=20,face="bold"),
+#        panel.grid.major = element_blank(),
+#        panel.grid.minor = element_blank(),
+#        panel.border = element_blank(),
+#        panel.background = element_blank()) 
 
-histvornvSGA
+#histvornvSGA
 ```
 Hostility and VorNVG histogram
 ```{r}
-histvornvhos <- ggplot(data, aes(x=VorNV, y=HostilityTotal, fill=Gender)) + 
-  geom_histogram(binwidth=2, position="dodge") +
-  xlab("") +
-  ylab("Mate Value Scale Total") +
-  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-  theme(axis.line = element_line(colour = "black"),
-        plot.title = element_text(size=30, face="bold"),
-        legend.position = "none",
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
+#histvornvhos <- ggplot(data, aes(x=VorNV, y=HostilityTotal, fill=Gender)) + 
+#  geom_histogram(binwidth=2, position="dodge") +
+#  xlab("") +
+#  ylab("Mate Value Scale Total") +
+#  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
+#  theme(axis.line = element_line(colour = "black"),
+#        plot.title = element_text(size=30, face="bold"),
+#        legend.position = "none",
+#        axis.text=element_text(size=18),
+#        axis.title=element_text(size=20,face="bold"),
+#        panel.grid.major = element_blank(),
+#        panel.grid.minor = element_blank(),
+#        panel.border = element_blank(),
+#        panel.background = element_blank()) 
 
-histvornvhos
+#histvornvhos
 ```
 
 Supplementary Materials
@@ -380,8 +380,8 @@ Supplementary Materials
 Here is the full model with age and all the interactions for Mturk 1
 
 ```{r}
-VGplayself.all.data<-lm(Averagefrequencyviolence ~ Mvscaletotal + MvAverage + SGAAverage+ HostilityTotal  + MATINGMOTIVATIONtotal + SOIRTOTAL + sexuality_response + sex_response + age_response + relationshipstatus_response +VorNV + sex_response*Mvscaletotal +sex_response**MvAverage +sex_response*sexuality_response +sex_response*relationshipstatus_response+ age_response*Mvscaletotal +age_response*MvAverage + age_response*SGAAverage + age_response*HostilityTotal + age_response*MATINGMOTIVATION_total +age_response*SOIRTOTAL + age_response*sexuality_response + age_response*relationshipstatus_response, data=mturk)
+#VGplayself.all.data<-lm(Averagefrequencyviolence ~ Mvscaletotal + MvAverage + SGAAverage+ HostilityTotal  + MATINGMOTIVATIONtotal + SOIRTOTAL + sexuality_response + sex_response + age_response + relationshipstatus_response +VorNV + sex_response*Mvscaletotal +sex_response**MvAverage +sex_response*sexuality_response +sex_response*relationshipstatus_response+ age_response*Mvscaletotal +age_response*MvAverage + age_response*SGAAverage + age_response*HostilityTotal + age_response*MATINGMOTIVATION_total +age_response*SOIRTOTAL + age_response*sexuality_response + age_response*relationshipstatus_response, data=mturk)
 
-anova(VGplayself.all.mturk1, test="Chisq")
-summary(VGplayself.all.mturk1)
+#anova(VGplayself.all.mturk1, test="Chisq")
+#summary(VGplayself.all.mturk1)
 ```
