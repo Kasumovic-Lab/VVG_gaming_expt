@@ -1,3 +1,6 @@
+---
+output: html_document
+---
 ANALYZING THE EFFECT OF VIOLENT VIDEO GAME PLAY ON MATE VALUE AND OTHER MATING RELATED VARIABLES
 ========================================================
 
@@ -13,7 +16,6 @@ library(PerformanceAnalytics)
 library(heplots)
 library(plyr)
 require(gridExtra)
-library(lattice)
 ```
 
 Load the data (Complete_data_survey.csv).
@@ -126,13 +128,36 @@ BoxVVGgender <- ggplot(data, aes(x=Gender, y=Averagefrequencyviolence)) + geom_b
 BoxVVGgender 
 ```
 
+Relationship between Age and Exposure to violence:
+```{r}
+plotAgeExposure <- ggplot(data, aes(x = Age, y = Averagefrequencyviolence, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0,50) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(10,70)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Violent Video Game Exposure") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotAgeExposure
+```
+
 
 Here is the full model
 
 ```{r}
-VGplayselfall<-lm(Averagefrequencyviolence~ MV1Total + MV2Average + SOIRTOTAL + SGAAverage + HostilityTotal + MATINGMOTIVATIONtotal + Gender + Sexuality + Age + Relationshipstatus + VorNV + Gender*MV1Total + Gender*SOIRTOTAL + Gender*MV2Average + Gender*HostilityTotal + Gender*MATINGMOTIVATIONtotal + Gender*Sexuality + Gender*Relationshipstatus, data=data)
+VGplayselfall<-lm(Averagefrequencyviolence~ MV1Total + MV2Average + SOIRTOTAL + SGAAverage + HostilityTotal + MATINGMOTIVATIONtotal + Gender + Sexuality + Age + Relationshipstatus + VorNV + Gender*MV1Total + Gender*SOIRTOTAL + Gender*MV2Average + Gender*HostilityTotal + Gender*MATINGMOTIVATIONtotal + Gender*Sexuality + Gender*Relationshipstatus + MATINGMOTIVATIONtotal*MV2Average + MATINGMOTIVATIONtotal*SOIRTOTAL + SOIRTOTAL*MV2Average, data=data)
 
-anova(VGplayselfall, test="typeIII")
+anova(VGplayselfall, test="chisq")
 summary(VGplayselfall)
 ```
 
@@ -148,10 +173,10 @@ cor.test(data$Averagefrequencyviolence,data$SOIRTOTAL)
 #cor.test(data.mal$Averagefrequencyviolence,data.mal$MV1)
 
 ```
-22 Item MV scale and VVG for each gender regression
+22 Item MV scale and VVG for each gender 
 ```{r}
-fit <- lm(MV2Average ~ Averagefrequencyviolence + Gender, data=data)
-summary(fit) 
+MVexposure <- lm(MV2Average ~  Gender + Gender*Averagefrequencyviolence +  Averagefrequencyviolence, data = data)
+anova(MVexposure, test="Chisq")
 ```
 Plot Mate Value and VVGplay for each gender - 22 item mv scale
 
@@ -203,12 +228,6 @@ ggplot(data, aes(x = MV1Total, y = Selfscore, color = Gender)) +
         panel.background = element_blank()) 
 ```
 
-Now, plot both MV figures together
-```{r}
-#grid.arrange(plotMV1, plotMV2, ncol=2)
-#g <- arrangeGrob(plotMV1, plotMV2, ncol=2)
-#ggsave(file="MateValue.tiff",g)
-```
 
 SOI + Averagefrequencyviolence+Gender Regression
 ```{r}
@@ -237,10 +256,33 @@ plotSOI1 <- ggplot(data, aes(x = SOIRTOTAL, y = Averagefrequencyviolence, color 
         panel.background = element_blank()) 
 plotSOI1
 ```
+SOIR Age and Gender Plot
+```{r}
+plotSOI2 <- ggplot(data, aes(x = Age, y = SOIRTOTAL, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size=4) +
+  ylim(5,75) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(15,80)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Sexual Interest") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotSOI2
+```
+
 
 Matingmotivation Regression Avfreqviolence
 ```{r}
-fitMM <- lm(MATINGMOTIVATIONtotal ~ Averagefrequencyviolence + Gender, data=data)
+fitMM <- lm(MATINGMOTIVATIONtotal ~ Averagefrequencyviolence + Gender + Age, data=data)
 summary(fitMM) 
 ```
 
@@ -251,7 +293,7 @@ ggplot(data, aes(x = MATINGMOTIVATIONtotal, y = Averagefrequencyviolence, color 
   theme_bw() + geom_smooth(method=lm, fullrange=T) + 
   scale_colour_hue(l=50, guide = FALSE) +
   ylim(0,50) +
-  scale_x_continuous(limits=c(0.75,7.25), breaks=c(1:7)) +
+  scale_x_continuous(limits=c(0.75,30)) +
   xlab("Gaming Motivation") +
   ylab("Violent Video Game Exposure") +
   theme(axis.line = element_line(colour = "black"),
@@ -287,9 +329,9 @@ VorNVMVoppositesex <- lm(Mvfactorviewofoppositesex ~ VorNV + Age + Gender + Gend
 anova(VorNVMVoppositesex, test="Chisq")
 ```
 
-GA + VVG + gender ANOVA
+SGA + VVG + gender ANOVA
 ```{r}
-SGAVVG <- lm(SGAAverage ~  VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age, data = data)
+SGAVVG <- lm(SGAAverage ~  VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age +Relationshipstatus + Relationshipstatus*Age, data = data)
 anova(SGAVVG, test="Chisq")
 ```
 
@@ -306,82 +348,175 @@ MMANOVAVVG <- lm(MATINGMOTIVATIONtotal ~  VorNV + Age + Gender + Gender*Averagef
 anova(MMANOVAVVG, test="Chisq")
 ```
 
-
-MV Scale and Violent or NV game histogram: 
-
+Plot Matingmoviation and selfscore
 ```{r}
-#hist(~MV1Total|VorNV*Gender, data=data,
-#       type="MV",
-#       xlab="Gender",
-#       main="")
+plotmmselfscore <- ggplot(data, aes(x = Selfscore, y = MATINGMOTIVATIONtotal, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size=4) +
+  ylim(0,30) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7.5)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Self Score") +
+  ylab("Gaming Motivation") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotmmselfscore
 ```
 
-MV2 x V or Non V histogram
-```{r}
-#ggplot(data, aes(x=VorNV, y=MV2Average, fill=Gender)) + 
-#  geom_histogram(binwidth=2, position="dodge") +
-#  xlab("Violent or Non-violent game played") +
-#  ylab("Mate Value Total") +
-#  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-#  theme(axis.line = element_line(colour = "black"),
-#        plot.title = element_text(size=30, face="bold"),
-#        legend.position = "none",
-#        axis.text=element_text(size=18),
-#        axis.title=element_text(size=20,face="bold"),
-#        panel.grid.major = element_blank(),
-#        panel.grid.minor = element_blank(),
-#        panel.border = element_blank(),
-#        panel.background = element_blank()) 
+Plot MV 2 and selfscore : 
 
+```{r}
+plotMvAverageselfs <- ggplot(data, aes(x = MV2Average, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0,10) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Mate Value") +
+  ylab("Selfscore") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotMvAverageselfs
 ```
 
-Historgram for SGA and VorNV
+MV1 x selfscore 
 ```{r}
-#histvornvmv1 <- ggplot(data, aes(x=SGAAverage, y=VorNV, fill=Gender)) + 
-#  geom_histogram(binwidth=2, position="dodge") +
-#  xlab("Violent or Non-violent game played") +
-#  ylab("Sex Goal Activation") +
-#  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-#  theme(axis.line = element_line(colour = "black"),
-#        plot.title = element_text(size=30, face="bold"),
-#        legend.position = "none",
-#        axis.text=element_text(size=18),
-#        axis.title=element_text(size=20,face="bold"),
-#        panel.grid.major = element_blank(),
-#        panel.grid.minor = element_blank(),
-#        panel.border = element_blank(),
-#        panel.background = element_blank()) 
-
-#histvornvSGA
+plotMv2selfs <-ggplot(data, aes(x = MV2Average, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0,7.5) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Mate Value") +
+  ylab("Selfscore") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotMv2selfs
 ```
-Hostility and VorNVG histogram
+MV2 and age 
 ```{r}
-#histvornvhos <- ggplot(data, aes(x=VorNV, y=HostilityTotal, fill=Gender)) + 
-#  geom_histogram(binwidth=2, position="dodge") +
-#  xlab("") +
-#  ylab("Mate Value Scale Total") +
-#  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-#  theme(axis.line = element_line(colour = "black"),
-#        plot.title = element_text(size=30, face="bold"),
-#        legend.position = "none",
-#        axis.text=element_text(size=18),
-#        axis.title=element_text(size=20,face="bold"),
-#        panel.grid.major = element_blank(),
-#        panel.grid.minor = element_blank(),
-#        panel.border = element_blank(),
-#        panel.background = element_blank()) 
-
-#histvornvhos
+plotmv2age <- ggplot(data, aes(x = Age, y = MV2Average, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(1,7) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(10,70)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Mate Value") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotmv2age
 ```
 
-Supplementary Materials
------------------------
-
-Here is the full model with age and all the interactions for Mturk 1
-
+MV2+  Selfscore*Gender 
 ```{r}
-#VGplayself.all.data<-lm(Averagefrequencyviolence ~ Mvscaletotal + MvAverage + SGAAverage+ HostilityTotal  + MATINGMOTIVATIONtotal + SOIRTOTAL + sexuality_response + sex_response + age_response + relationshipstatus_response +VorNV + sex_response*Mvscaletotal +sex_response**MvAverage +sex_response*sexuality_response +sex_response*relationshipstatus_response+ age_response*Mvscaletotal +age_response*MvAverage + age_response*SGAAverage + age_response*HostilityTotal + age_response*MATINGMOTIVATION_total +age_response*SOIRTOTAL + age_response*sexuality_response + age_response*relationshipstatus_response, data=mturk)
+plotmv2selfscore <- ggplot(data, aes(x = Selfscore, y = MV2Average, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(1,7) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7.5)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Selfscore") +
+  ylab("Mate Value") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotmv2selfscore
+```
+SGA and AGE
+```{r}
+plotsgaage <- ggplot(data, aes(x = Age, y = SGAAverage, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0.5,7.5) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(10,70)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Sex Goal Activation") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotsgaage
+```
+```
+Hostility and AGe
+```{r}
+plotAgeHostility <- ggplot(data, aes(x = Age, y = HostilityTotal, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(5,25) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(10,70)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Hostility") +
+  theme(legend.position="none") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotAgeHostility
+```
 
-#anova(VGplayself.all.mturk1, test="Chisq")
-#summary(VGplayself.all.mturk1)
+*****MANOVA*******
+
+##MANOVA
+```{r}
+MANOVA1<- manova(cbind(MV1Total, MV2Average, SGAAverage, HostilityTotal, SOIRTOTAL, MATINGMOTIVATIONtotal) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + Age*Averagefrequencyviolence + Gender*Averagefrequencyviolence + Selfscore*Gender + Age*Gender + Age*Selfscore, data=data)
+summary(MANOVA1, test="Pillai")
+```
+
+##Univariate Tests
+```{r}
+summary.aov(MANOVA1)
 ```
