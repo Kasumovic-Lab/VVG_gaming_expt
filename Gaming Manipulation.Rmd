@@ -161,18 +161,6 @@ anova(VGplayselfall, test="chisq")
 summary(VGplayselfall)
 ```
 
-calculate r-squared for relationship between SOI & MV with VVGExposure
-
-```{r}
-cor.test(data$Averagefrequencyviolence,data$SOIRTOTAL)
-
-#data.fem = subset(data, Gender=="Female")
-#cor.test(data.fem$Averagefrequencyviolence,data.fem$MV1)
-
-#data.mal = subset(data, Gender=="Male")
-#cor.test(data.mal$Averagefrequencyviolence,data.mal$MV1)
-
-```
 22 Item MV scale and VVG for each gender 
 ```{r}
 MVexposure <- lm(MV2Average ~  Gender + Gender*Averagefrequencyviolence +  Averagefrequencyviolence, data = data)
@@ -305,46 +293,40 @@ ggplot(data, aes(x = MATINGMOTIVATIONtotal, y = Averagefrequencyviolence, color 
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
-        legend.position=c(.90,.10)) 
+      
 
 ```
 
 *****************Gaming manipulation: *********************
 MV1 + VVG + gender ANOVA*
 ```{r}
-VorNVMV1 <- lm(MV1Total ~  VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age, data = data)
+VorNVMV1 <- lm(MV1Total ~  Age + Gender+ Selfscore + Selfscore*Gender + Selfscore*Age + Age*Gender, data = data)
 anova(VorNVMV1, test="Chisq")
 ```
 
 
 MV2 + VVG + Gender ANOVA
 ```{r}
-VorNVMV2 <- lm(MV2Average ~ VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age, data = data)
+VorNVMV2 <- lm(MV2Average ~ Age + Gender + Selfscore + Selfscore*Gender + Selfscore*Age + Age*Gender, data = data)
 anova(VorNVMV2, test="Chisq")
-```
-
-MVfactorviewofoppositesex + Gender + VVG
-```{r}
-VorNVMVoppositesex <- lm(Mvfactorviewofoppositesex ~ VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age, data = data)
-anova(VorNVMVoppositesex, test="Chisq")
 ```
 
 SGA + VVG + gender ANOVA
 ```{r}
-SGAVVG <- lm(SGAAverage ~  VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age +Relationshipstatus + Relationshipstatus*Age, data = data)
+SGAVVG <- lm(SGAAverage ~  VorNV + Age + Gender + Selfscore + Selfscore*Gender + Selfscore*Age , data = data)
 anova(SGAVVG, test="Chisq")
 ```
 
 Hostility + VVG + gender ANOVA
 ```{r}
-HostVVG <- lm(HostilityTotal ~  VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age, data = data)
+HostVVG <- lm(HostilityTotal ~ Age + Gender + Selfscore + Selfscore*Gender + Selfscore*Age + Age*Gender, data = data)
 anova(HostVVG, test="Chisq")
 ```
 
 Matingmotivation + gender ANOVA + otherfactors
 
 ```{r}
-MMANOVAVVG <- lm(MATINGMOTIVATIONtotal ~  VorNV + Age + Gender + Gender*Averagefrequencyviolence + VorNV*Gender + VorNV*Age + VorNV*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Numericalgameplayed +Numericalgameplayed*Gender + Numericalgameplayed*Age, data = data)
+MMANOVAVVG <- lm(MATINGMOTIVATIONtotal ~ Age + Gender + Gender*Averagefrequencyviolence + Averagefrequencyviolence + Selfscore + Selfscore*Gender + Selfscore*Age + Age*Gender, data = data)
 anova(MMANOVAVVG, test="Chisq")
 ```
 
@@ -374,9 +356,9 @@ plotmmselfscore
 Plot MV 2 and selfscore : 
 
 ```{r}
-plotMvAverageselfs <- ggplot(data, aes(x = MV2Average, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+plotMvAverageselfs <- ggplot(data, aes(x = Selfscore, y = MV2Average, color = Gender, shape = Gender, linetype = Gender)) + 
   geom_point(size = 4) + 
-  ylim(0,10) +
+  ylim(0,7.5) +
   scale_colour_hue(l=50, guide = FALSE) +
   scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
@@ -397,11 +379,11 @@ plotMvAverageselfs
 
 MV1 x selfscore 
 ```{r}
-plotMv2selfs <-ggplot(data, aes(x = MV2Average, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+plotMv1selfs <-ggplot(data, aes(x = Selfscore, y = MV1Total, color = Gender, shape = Gender, linetype = Gender)) + 
   geom_point(size = 4) + 
-  ylim(0,7.5) +
+  ylim(0,30) +
   scale_colour_hue(l=50, guide = FALSE) +
-  scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
+  scale_x_continuous(limits=c(0.5,9), breaks=c(1:7)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
   xlab("Mate Value") +
   ylab("Selfscore") +
@@ -415,7 +397,7 @@ plotMv2selfs <-ggplot(data, aes(x = MV2Average, y = Selfscore, color = Gender, s
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
-plotMv2selfs
+plotMv1selfs
 ```
 MV2 and age 
 ```{r}
@@ -440,28 +422,6 @@ plotmv2age <- ggplot(data, aes(x = Age, y = MV2Average, color = Gender, shape = 
 plotmv2age
 ```
 
-MV2+  Selfscore*Gender 
-```{r}
-plotmv2selfscore <- ggplot(data, aes(x = Selfscore, y = MV2Average, color = Gender, shape = Gender, linetype = Gender)) + 
-  geom_point(size = 4) + 
-  ylim(1,7) +
-  scale_colour_hue(l=50, guide = FALSE) +
-  scale_x_continuous(limits=c(0,7.5)) +
-  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
-  xlab("Selfscore") +
-  ylab("Mate Value") +
-  theme(legend.position="none") +
-  theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold"),
-        axis.title.y=element_text(vjust=0.25),
-        axis.title.x=element_text(vjust=0.25),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) 
-plotmv2selfscore
-```
 SGA and AGE
 ```{r}
 plotsgaage <- ggplot(data, aes(x = Age, y = SGAAverage, color = Gender, shape = Gender, linetype = Gender)) + 
