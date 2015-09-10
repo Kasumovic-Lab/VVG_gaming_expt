@@ -73,6 +73,17 @@ Here's mean centring the data
 ```
 
 ---------------
+First, check the distributions of all the variables of interest
+```{r}
+hist(data$MV1Total)
+hist(data$MV2Average)
+hist(data$SGAAverage)
+hist(data$HostilityTotal)
+hist(data$SOIRTOTAL)
+hist(data$MATINGMOTIVATIONtotal)
+```
+
+The ditributions for all of them are fine, except for Hostility Total and Mating Motivation. HT specifically has very little variation in it, so I don't think it will be very useful and am happy to remove it from the models. MM has a terrible skew and no transformations will really help. As a result, I think it would be alright to remove that from the model as well.
 
 What is the mean, SD and range of the age of respondents in the first sample?
 ```{r}
@@ -138,8 +149,7 @@ plotAgeExposure <- ggplot(data, aes(x = Age, y = Averagefrequencyviolence, color
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
   xlab("Age") +
   ylab("Violent Video Game Exposure") +
-  theme(legend.position="none") +
-  theme(axis.line = element_line(colour = "black"),
+    theme(axis.line = element_line(colour = "black"),
         axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold"),
         axis.title.y=element_text(vjust=0.25),
@@ -292,7 +302,7 @@ ggplot(data, aes(x = MATINGMOTIVATIONtotal, y = Averagefrequencyviolence, color 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        panel.background = element_blank(),
+        panel.background = element_blank())
       
 
 ```
@@ -362,9 +372,8 @@ plotMvAverageselfs <- ggplot(data, aes(x = Selfscore, y = MV2Average, color = Ge
   scale_colour_hue(l=50, guide = FALSE) +
   scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
-  xlab("Mate Value") +
-  ylab("Selfscore") +
-  theme(legend.position="none") +
+  xlab("Selfscore") +
+  ylab("Mate Value") +
   theme(axis.line = element_line(colour = "black"),
         axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold"),
@@ -381,13 +390,11 @@ MV1 x selfscore
 ```{r}
 plotMv1selfs <-ggplot(data, aes(x = Selfscore, y = MV1Total, color = Gender, shape = Gender, linetype = Gender)) + 
   geom_point(size = 4) + 
-  ylim(0,30) +
   scale_colour_hue(l=50, guide = FALSE) +
   scale_x_continuous(limits=c(0.5,9), breaks=c(1:7)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
-  xlab("Mate Value") +
-  ylab("Selfscore") +
-  theme(legend.position="none") +
+  xlab("Selfscore") +
+  ylab("Mate Value") +
   theme(axis.line = element_line(colour = "black"),
         axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold"),
@@ -479,4 +486,78 @@ summary(MANOVA1, test="Pillai")
 ##Univariate Tests
 ```{r}
 summary.aov(MANOVA1)
+```
+
+
+Here is another try from Mike. I'm just changing some of the interactions here
+
+##MANOVA
+```{r}
+MANOVA1<- manova(cbind(MV2Average, SGAAverage, SOIRTOTAL, MATINGMOTIVATIONtotal) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+summary(MANOVA1, test="Pillai")
+```
+
+##Univariate Tests
+```{r}
+summary.aov(MANOVA1)
+
+lm1<- lm(MV1Total ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+summary(lm1)
+anova(lm1)
+anova(lm1, test = "Chisq")
+
+plot(fitted(lm1), residuals(lm1))
+qqnorm(residuals(lm1))
+qqline(residuals(lm1))
+
+lm2<- lm(MV2Average ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+summary(lm2)
+anova(lm2, test = "Chisq")
+
+plot(fitted(lm2), residuals(lm2))
+qqnorm(residuals(lm2))
+qqline(residuals(lm2))
+
+lm3<- lm(SGAAverage ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+summary(lm3)
+anova(lm3, test = "Chisq")
+
+plot(fitted(lm3), residuals(lm3))
+qqnorm(residuals(lm3))
+qqline(residuals(lm3))
+
+lm4<- lm(SOIRTOTAL ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+summary(lm4)
+anova(lm4, test = "Chisq")
+
+plot(fitted(lm4), residuals(lm4))
+qqnorm(residuals(lm4))
+qqline(residuals(lm4))
+
+lm5<- lm(MATINGMOTIVATIONtotal ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+summary(lm5)
+anova(lm5, test="Chisq")
+
+plot(fitted(lm5), residuals(lm5))
+qqnorm(residuals(lm5))
+qqline(residuals(lm5))
+```
+
+
+```{r}
+ggplot(data, aes(x = Selfscore, y = SOIRTOTAL, color = VorNV, shape = VorNV, linetype = VorNV)) + 
+  geom_point(size = 4) + 
+  scale_colour_hue(l=50, guide = FALSE) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Selfscore") +
+  ylab("SOI") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
 ```
