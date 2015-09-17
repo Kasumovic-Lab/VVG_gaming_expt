@@ -1,6 +1,4 @@
----
-output: html_document
----
+
 ANALYZING THE EFFECT OF VIOLENT VIDEO GAME PLAY ON MATE VALUE AND OTHER MATING RELATED VARIABLES
 ========================================================
 
@@ -384,7 +382,7 @@ Mate Value Test 1 (4-Item Mate Value Scale, Edlund and Sagarin 2014)
 
 MV1 + gender + selfscore ANOVA*
 ```{r}
-MV1selfscore <- lm(MV1Total ~  Gender+ Selfscore + Selfscore*Gender + , data = data)
+MV1selfscore <- lm(MV1Total ~  Gender+ Selfscore + Selfscore*Gender, data = data)
 anova(MV1selfscore, test="Chisq")
 ```
 
