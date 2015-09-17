@@ -76,6 +76,7 @@ hist(data$SGAAverage)
 hist(data$HostilityTotal)
 hist(data$SOIRTotal)
 hist(data$MMTotal)
+hist(data$Matevalue)
 ```
 
 The ditributions for all of them are fine, except for Hostility Total and Mating Motivation. HT specifically has very little variation in it, so I don't think it will be very useful and am happy to remove it from the models. MM has a terrible skew and no transformations will really help. As a result, I think it would be alright to remove that from the model as well.
@@ -95,7 +96,25 @@ VVGSex1 <- lm(Averagefrequencyviolence ~ Age + Gender + Age*Gender, data = data)
 anova(VVGSex1, test="Chisq")
 summary(VVGSex1, test="Chisq")
 ```
+HISTOGRAM
+```{r}
+hist1 <- ggplot(data, aes(x=Averagefrequencyviolence, fill=Gender)) + 
+  geom_histogram(binwidth=2, position="dodge") +
+  xlab("Self-rated Violence Exposure") +
+  ylab("Count") +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
+  theme(axis.line = element_line(colour = "black"),
+        plot.title = element_text(size=30, face="bold"),
+        legend.position = "right",
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
 
+hist1
+```
 Boxplot of VVGplay between gender (Self-reported)
 
 ```{r}
@@ -143,7 +162,7 @@ plotAgeExposure
 
 ##MANOVA
 ```{r}
-MANOVA2<- manova(cbind(MV2Average, SGAAverage, SOIRTotal, MMTotal) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+MANOVA2<- manova(cbind(Matevalue, SGAAverage, SOIRTotal, MMTotal) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
 summary(MANOVA2, test="Pillai")
 ```
 
@@ -151,7 +170,7 @@ summary(MANOVA2, test="Pillai")
 ```{r}
 summary.aov(MANOVA2)
 
-lm1<- lm(MV1Total ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+lm1<- lm(Matevalue ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
 summary(lm1)
 anova(lm1)
 anova(lm1, test = "Chisq")
@@ -160,7 +179,7 @@ plot(fitted(lm1), residuals(lm1))
 qqnorm(residuals(lm1))
 qqline(residuals(lm1))
 
-lm2<- lm(MV2Average ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore , data=data)
+lm2<- lm(Matevalue ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore , data=data)
 summary(lm2)
 anova(lm2, test = "Chisq")
 
@@ -388,5 +407,50 @@ ggplot(data, aes(x = SOIRTotal, y = TotalSTScore, color = Gender, shape = Gender
 ```
 
 
+MATEVALUE
+
+```{r}
+plotmvselfscore <- ggplot(data, aes(x = Matevalue, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0.5,7.5) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7.5)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Mate value ") +
+  ylab("Self Rated Score") + 
+  theme(legend.position="right") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotmvselfscore
+```
+MV + STScore
+```{r}
+plotstsmv <- ggplot(data, aes(x = TotalSTScore, y = Matevalue, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0.5,7.5) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7.5)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Facial Preference for masculinity ") +
+  ylab("MV") + 
+  theme(legend.position="right") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotstsmv
+```
 
 
