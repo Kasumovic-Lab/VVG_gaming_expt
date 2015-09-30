@@ -67,8 +67,9 @@ img {
 <h2>General housekeeping</h2>
 <p>First load the libraries that we are using</p>
 <pre class="r"><code>library(ggplot2)
-library(knitr)
-library(QuantPsyc)</code></pre>
+library(knitr)</code></pre>
+<pre><code>## Warning: package 'knitr' was built under R version 3.2.2</code></pre>
+<pre class="r"><code>library(QuantPsyc)</code></pre>
 <pre><code>## Loading required package: boot
 ## Loading required package: MASS
 ## 
@@ -148,28 +149,28 @@ require(gridExtra)</code></pre>
 ##  [73] &quot;MVFactorparenting&quot;           &quot;MVFactorWealth&quot;             
 ##  [75] &quot;MVFactorLooks&quot;               &quot;MVfactorRelationshiphistory&quot;
 ##  [77] &quot;MVFactorFearoffailure&quot;       &quot;MV2Average&quot;                 
-##  [79] &quot;sgaq1&quot;                       &quot;sgaq2&quot;                      
-##  [81] &quot;sgaq3&quot;                       &quot;sgaq4&quot;                      
-##  [83] &quot;sgaq5&quot;                       &quot;sgaq6&quot;                      
-##  [85] &quot;sgaq7&quot;                       &quot;sgaq8&quot;                      
-##  [87] &quot;SGAAverage&quot;                  &quot;hos1&quot;                       
-##  [89] &quot;hos2&quot;                        &quot;hos3&quot;                       
-##  [91] &quot;hos4&quot;                        &quot;hos5&quot;                       
-##  [93] &quot;hos6&quot;                        &quot;HostilityTotal&quot;             
-##  [95] &quot;mm1&quot;                         &quot;mm2&quot;                        
-##  [97] &quot;mm3&quot;                         &quot;mm4&quot;                        
-##  [99] &quot;MATINGMOTIVATIONtotal&quot;       &quot;soirq1&quot;                     
-## [101] &quot;soirq2&quot;                      &quot;soirq3&quot;                     
-## [103] &quot;soirq4&quot;                      &quot;soirq5&quot;                     
-## [105] &quot;soirq6&quot;                      &quot;SOIRQ6Reversecoding&quot;        
-## [107] &quot;soirq7&quot;                      &quot;soirq8&quot;                     
-## [109] &quot;soirq9&quot;                      &quot;soirq10&quot;                    
-## [111] &quot;SOIRQ1Score&quot;                 &quot;SOIRQ2Score&quot;                
-## [113] &quot;SOIRQSCORE&quot;                  &quot;SOIRBehaviouralfacet&quot;       
-## [115] &quot;SOIRATTITUDEFACET&quot;           &quot;SOIRDESIREFACET&quot;            
-## [117] &quot;SOIRTOTAL&quot;                   &quot;troubleunderstanding&quot;       
-## [119] &quot;furtherquestions&quot;            &quot;Removedata&quot;                 
-## [121] &quot;Reason.for.removal&quot;</code></pre>
+##  [79] &quot;Matevalue&quot;                   &quot;sgaq1&quot;                      
+##  [81] &quot;sgaq2&quot;                       &quot;sgaq3&quot;                      
+##  [83] &quot;sgaq4&quot;                       &quot;sgaq5&quot;                      
+##  [85] &quot;sgaq6&quot;                       &quot;sgaq7&quot;                      
+##  [87] &quot;sgaq8&quot;                       &quot;SGAAverage&quot;                 
+##  [89] &quot;hos1&quot;                        &quot;hos2&quot;                       
+##  [91] &quot;hos3&quot;                        &quot;hos4&quot;                       
+##  [93] &quot;hos5&quot;                        &quot;hos6&quot;                       
+##  [95] &quot;HostilityTotal&quot;              &quot;mm1&quot;                        
+##  [97] &quot;mm2&quot;                         &quot;mm3&quot;                        
+##  [99] &quot;mm4&quot;                         &quot;MATINGMOTIVATIONtotal&quot;      
+## [101] &quot;soirq1&quot;                      &quot;soirq2&quot;                     
+## [103] &quot;soirq3&quot;                      &quot;soirq4&quot;                     
+## [105] &quot;soirq5&quot;                      &quot;soirq6&quot;                     
+## [107] &quot;SOIRQ6Reversecoding&quot;         &quot;soirq7&quot;                     
+## [109] &quot;soirq8&quot;                      &quot;soirq9&quot;                     
+## [111] &quot;soirq10&quot;                     &quot;SOIRQ1Score&quot;                
+## [113] &quot;SOIRQ2Score&quot;                 &quot;SOIRQSCORE&quot;                 
+## [115] &quot;SOIRBehaviouralfacet&quot;        &quot;SOIRATTITUDEFACET&quot;          
+## [117] &quot;SOIRDESIREFACET&quot;             &quot;SOIRTOTAL&quot;                  
+## [119] &quot;troubleunderstanding&quot;        &quot;furtherquestions&quot;           
+## [121] &quot;Removedata&quot;                  &quot;Reason.for.removal&quot;</code></pre>
 <p>Recode gender into numerical values</p>
 <pre class="r"><code>data$Gender2 &lt;- revalue(data$Gender, c(&quot;Male&quot;=&quot;1&quot;, &quot;Female&quot;=&quot;2&quot;))
 data$Gender2 &lt;- as.numeric(as.character(data$Gender2))</code></pre>

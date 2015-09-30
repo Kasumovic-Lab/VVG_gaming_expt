@@ -245,9 +245,9 @@ anova(STselection)
 
 
 ```{r}
-plotstscore <- ggplot(data, aes(x = TotalSTScore, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+plotstscore <- ggplot(data, aes(x = Selfscore, y = TotalSTScore, color = Gender, shape = Gender, linetype = Gender)) + 
   geom_point(size = 4) + 
-  ylim(0.5,7.5) +
+  ylim(0,7.5) +
   scale_colour_hue(l=50, guide = FALSE) +
   scale_x_continuous(limits=c(0,7.5)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
@@ -375,6 +375,26 @@ plotMv1selfs <-ggplot(data, aes(x = Selfscore, y = MV2Average, color = Gender, s
         panel.background = element_blank()) 
 plotMv1selfs
 ```
+MV1 x TotalSTScore x gender plot 
+```{r}
+plotMv1selfs <-ggplot(data, aes(x = TotalSTScore, y = MV1Total, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0.5,7.5), breaks=c(1:7)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Selfscore") +
+  ylab("Mate Value") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotMv1selfs
+```
 
 Mating motivation: 
 
@@ -453,4 +473,59 @@ plotstsmv <- ggplot(data, aes(x = TotalSTScore, y = Matevalue, color = Gender, s
 plotstsmv
 ```
 
+SOIR And STScore
+```{r}
+SOIRSTSAnova <- lm(TotalSTScore ~ Gender + Age + SOIRTotal + Gender*SOIRTotal, data = data)
+anova(SOIRSTSAnova, test="Chisq")
+```
 
+SOIR and LTScore 
+```{r}
+SOIRLTSAnova <- lm(TotalLTScore ~ Gender + Age + SOIRTotal + Gender*SOIRTotal, data = data)
+anova(SOIRLTSAnova, test="Chisq")
+```
+
+LTScore + SOIR
+```{r}
+plotltssoir <- ggplot(data, aes(x = TotalLTScore, y = SOIRTotal, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(5,80) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7.5)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Facial Preference for masculinity ") +
+  ylab("SOIR") + 
+  theme(legend.position="right") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotltssoir
+```
+MV + STScore
+```{r}
+plotstsmv <- ggplot(data, aes(x = TotalSTScore, y = Matevalue, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0.5,7.5) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7.5)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Facial Preference for masculinity ") +
+  ylab("MV") + 
+  theme(legend.position="right") +
+  theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+plotstsmv
+```
