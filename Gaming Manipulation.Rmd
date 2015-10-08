@@ -354,13 +354,13 @@ plotSOI2
 
 SOIR Self Score plot
 ```{r}
-plotSOI3 <- ggplot(data, aes(x = Age, y = SOIRTOTAL, color = Gender, shape = Gender, linetype = Gender)) + 
+plotSOI3 <- ggplot(data, aes(x = Selfscore, y = SOIRTOTAL, color = Gender, shape = Gender, linetype = Gender)) + 
   geom_point(size=4) +
-  ylim(5,75) +
+  ylim(7,75) +
   scale_colour_hue(l=50, guide = FALSE) +
-  scale_x_continuous(limits=c(15,80)) +
+  scale_x_continuous(limits=c(0.5,9.5)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
-  xlab("Age") +
+  xlab("Self-Rated Score") +
   ylab("Sexual Interest") +
   theme(legend.position="none") +
   theme(axis.line = element_line(colour = "black"),
@@ -372,7 +372,7 @@ plotSOI3 <- ggplot(data, aes(x = Age, y = SOIRTOTAL, color = Gender, shape = Gen
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
-plotSOI2
+plotSOI3
 ```
 
 -------------------------------------------------------------------
