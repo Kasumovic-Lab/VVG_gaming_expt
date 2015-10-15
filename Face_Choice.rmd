@@ -162,7 +162,7 @@ plotAgeExposure
 
 ##MANOVA
 ```{r}
-MANOVA2<- manova(cbind(Matevalue, SGAAverage, SOIRTotal, MMTotal) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+MANOVA2<- manova(cbind(Matevalue, SGAAverage, SOIRTotal, MMTotal,TotalSTScore) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
 summary(MANOVA2, test="Pillai")
 ```
 
@@ -240,8 +240,26 @@ plotsgaage
 -------------------------------------------------------------
 Short term faces: 
 
+```{r}
 STselection <- lm(TotalSTScore ~ MV2Average + SGAAverage + SOIRTotal + Age + Gender + Gender*MV2Average + Gender*SGAAverage + Gender*SOIRTotal, data=data)
 anova(STselection)
+```
+
+Mike's model to explore the effect of the treatment on face prefs
+```{r}
+STmodelmale <- lm(TotalSTScore ~ VorNV + Age + Selfscore + VorNV*Selfscore, data=subset(data, Gender=="Male"))
+anova(STmodelmale)
+
+STmodelfemale <- lm(TotalSTScore ~ VorNV + Age + Selfscore + VorNV*Selfscore, data=subset(data, Gender=="Female"))
+anova(STmodelfemale)
+
+
+LTmodelmale <- lm(TotalLTScore ~ VorNV + Age + Selfscore + VorNV*Selfscore, data=subset(data, Gender=="Male"))
+anova(LTmodelmale)
+
+LTmodelfemale <- lm(TotalLTScore ~ VorNV + Age + Selfscore + VorNV*Selfscore, data=subset(data, Gender=="Female"))
+anova(LTmodelfemale)
+```
 
 
 ```{r}
