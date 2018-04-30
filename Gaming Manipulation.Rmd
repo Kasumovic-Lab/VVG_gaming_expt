@@ -32,8 +32,9 @@ names(data)
 Recode gender into numerical values
 
 ```{r}
-data$Gender2 <- revalue(data$Gender, c("Male"="1", "Female"="2"))
-data$Gender2 <- as.numeric(as.character(data$Gender2))
+#data$Gender2 <- revalue(data$Gender, c("Male"="1", "Female"="2"))
+#data$Gender2 <- as.numeric(as.character(data$Gender2))
+data$Numericalgameplayed <- factor(data$Numericalgameplayed)
 ```
 Recode violent/non-violent treatment into numerical values
 
@@ -49,7 +50,7 @@ data$Sexuality <- factor(data$Sexuality)
 ```
 
 
-Delete Rows where participants were unable to load or play game, had issues with the survey loading, or failed an attention check (27 people). Also delete rows where participants recorded gender as "Other" (4 people).
+Delete Rows where participants were unable to load or play game, had issues with the survey loading, or failed an attention check (27 people). Also delete rows where participants recorded gender as "Other" (5 people).
 
 ```{r}
 data<-data[-which(data$Removedata == "Yes"), ]
@@ -57,7 +58,7 @@ data<-data[-which(data$Gender == "Other"), ]
 ```
 
 
-Remove individuals that have a relationship status of 'other' (2 individuals)
+Remove individuals that have a relationship status of 'other' (5 individuals)
 
 ```{r}
 data = subset(data, Relationshipstatus %in% c("Single", "In an open relationship/casually dating", "In a long-term monogamous relationship eg. married, partnered", "Recently single/divorced/separated"))
@@ -72,6 +73,7 @@ Here's mean centring the data
 #data$mc_HostilityTotal <- scale(data$HostilityTotal, center = TRUE, scale = TRUE)
 #data$mc_MMTotal <- scale(data$MMTotal, center = TRUE, scale = TRUE)
 ```
+
 
 ---------------
 First, check the distributions of all the variables of interest
@@ -93,17 +95,27 @@ sd(data$Age)
 range(data$Age)
 ```
 
+How many men and women, and their relationship details
+```{r}
+table(data$Gender)
+table(data$Relationshipstatus)
+table(data$lengthofrelationship)
+count(data, c("Kinsey", "Gender"))
+count(data, c("Relationshipstatus", "Gender"))
+```
 
 Do men and women differ in the amount of violent video games they play (self-rated)
 
 ```{r}
-VVGSex <- lm(Averagefrequencyviolence ~  Age + Gender + Age*Gender, data = data)
-anova(VVGSex, test="Chisq")
-summary(VVGSex, test="Chisq")
+VVGDemo <- lm(Averagefrequencyviolence ~  Age + Kinsey + Gender + Age*Kinsey + Gender*Kinsey + Age*Gender, data = data)
+anova(VVGDemo, test="Chisq")
+summary(VVGDemo, test="Chisq")
+
 ```
+
 HISTOGRAM
 ```{r}
-hist1 <- ggplot(data, aes(x=Averagefrequencyviolence, fill=Gender)) + 
+ggplot(data, aes(x=Averagefrequencyviolence, fill=Gender)) + 
   geom_histogram(binwidth=2, position="dodge") +
   xlab("Self-rated Violence Exposure") +
   ylab("Count") +
@@ -117,37 +129,36 @@ hist1 <- ggplot(data, aes(x=Averagefrequencyviolence, fill=Gender)) +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
-
-hist1
 ```
 
-Boxplot of VVGplay between gender (Self-reported)
-
+Relationship between Kinsey Scale, Gender, and Exposure to violence:
 ```{r}
-BoxVVGgender <- ggplot(data, aes(x=Gender, y=Averagefrequencyviolence)) + geom_boxplot() + 
-  guides(fill=FALSE) + 
-  xlab("Gender") +
-  ylab("Self-Rated Violence Exposure") +
-  theme(axis.line = element_line(colour = "black"),
+ggplot(data, aes(x = Kinsey, y = Averagefrequencyviolence, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0,50) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  scale_x_continuous(limits=c(0,7)) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Kinsey Scale") +
+  ylab("Violent Video Game Exposure") +
+    theme(axis.line = element_line(colour = "black"),
         axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold"),
-        axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
-
-BoxVVGgender 
 ```
-
 
 Relationship between Age and Exposure to violence:
 ```{r}
-plotAgeExposure <- ggplot(data, aes(x = Age, y = Averagefrequencyviolence, color = Gender, shape = Gender, linetype = Gender)) + 
+ggplot(data, aes(x = Age, y = Averagefrequencyviolence, color = Gender, shape = Gender, linetype = Gender)) + 
   geom_point(size = 4) + 
   ylim(0,50) +
   scale_colour_hue(l=50, guide = FALSE) +
-  scale_x_continuous(limits=c(10,70)) +
+  scale_x_continuous(limits=c(0,7)) +
   theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
   xlab("Age") +
   ylab("Violent Video Game Exposure") +
@@ -160,15 +171,63 @@ plotAgeExposure <- ggplot(data, aes(x = Age, y = Averagefrequencyviolence, color
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) 
-plotAgeExposure
 ```
 
 
 ---------------------------
 
+
+
+Do men and women differ in how well they performed in the game in both self-rated (selfscore) and actual performance
+
+```{r}
+Perf <- lm(Selfscore ~  Age + Gender + VorNV + Age*VorNV + Gender*VorNV, data = data)
+anova(Perf, test="Chisq")
+summary(Perf, test="Chisq")
+
+
+ggplot(data, aes(x = Age, y = Selfscore, color = VorNV, shape = VorNV, linetype = VorNV)) + 
+  geom_point(size = 4) + 
+  ylim(0,10) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Selfscore") +
+    theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+
+ggplot(data, aes(x = Age, y = Selfscore, color = Gender, shape = Gender, linetype = Gender)) + 
+  geom_point(size = 4) + 
+  ylim(0,10) +
+  scale_colour_hue(l=50, guide = FALSE) +
+  theme_bw() + geom_smooth(method=lm,  fullrange=T) + 
+  xlab("Age") +
+  ylab("Selfscore") +
+    theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold"),
+        axis.title.y=element_text(vjust=0.25),
+        axis.title.x=element_text(vjust=0.25),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+
+##Need to find some way to standardize the scores within game category
+##Nevermind...people lied with their scores so standardizing doesn't make a difference
+#ddply(data, "Gameplayed", transform, Score_std = scale(data$Score, center = TRUE, scale = TRUE))
+```
+
 ##MANOVA
 ```{r}
-MANOVA1<- manova(cbind(MV2Average, SGAAverage, SOIRTOTAL, MATINGMOTIVATIONtotal) ~ VorNV + Age + Selfscore + Gender + Averagefrequencyviolence + VorNV*Age + VorNV*Selfscore + VorNV*Gender + Selfscore*Gender + Age*Selfscore, data=data)
+MANOVA1<- manova(cbind(MV2Average, SGAAverage, SOIRTOTAL, MATINGMOTIVATIONtotal) ~ VorNV + Age + Selfscore + Kinsey + Gender + Averagefrequencyviolence + VorNV*Selfscore + VorNV*Gender, data=data)
 summary(MANOVA1, test="Pillai")
 ```
 
